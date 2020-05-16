@@ -2,7 +2,7 @@ import asyncio
 from decimal import Decimal
 import os
 import time
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from async_lru import alru_cache
 from asyncache import cached
@@ -38,6 +38,15 @@ async def get_posts_by_attr_containing(attr, value):
     :return:
     """
     return blog_table.scan(FilterExpression=Attr(attr).contains(value))
+
+
+@cached(cache=TTLCache(maxsize=128, ttl=600))
+async def get_all_posts() -> List[Dict[str, Any]]:
+    """
+    Attempts to retrieve all posts in the blog table.
+    :return: List containing all of the posts as dicts; empty list if no results.
+    """
+    return blog_table.scan().get("Items", [])
 
 
 @cached(cache=TTLCache(maxsize=128, ttl=6000))

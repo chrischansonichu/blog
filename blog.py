@@ -67,7 +67,7 @@ def preview_posts(posts: List[Dict], num_posts: int = 3):
 
 
 def category_counter(d: List[Dict]) -> List[Dict[str, Union[str, int]]]:
-    count = Counter(reduce(lambda x, y: x+y["categories"], d, []))
+    count: Counter = Counter(reduce(lambda x, y: x+y["categories"], d, []))
     return [{"name": x, "count": y} for x, y in count.items()]
 
 
@@ -77,7 +77,7 @@ async def get_all_posts_by_date():
 
 @app.template_filter("env")
 def env(key: str) -> str:
-    return getenv(key)
+    return getenv(key, "")
 
 
 @app.template_filter('ctime')
