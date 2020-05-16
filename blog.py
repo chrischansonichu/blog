@@ -1,13 +1,10 @@
 from collections import Counter
 from functools import reduce
-import json
 from os import path, getenv
 import time
 from typing import Dict, List, Union
 
 from async_lru import alru_cache
-# from cachetools import cached, LRUCache, TTLCache
-from delta import html
 import markdown2
 import quart
 from quart import Quart, render_template, make_response, request
@@ -20,7 +17,8 @@ ROOT_DIR = path.abspath(path.dirname(path.abspath(path.dirname(__file__))))
 app = Quart(__name__,
             static_folder=path.join(ROOT_DIR, "static"),
             static_url_path="/static")
-app.secret_key = "vsGmEN8XNT0cv9MolM7Qhg"
+app.secret_key = getenv("SECRETKEY", "")
+
 
 def markup(string: str, markup_=True) -> str:
     """
@@ -60,6 +58,12 @@ def truncate_post(post: Dict[str, str], words: int = 85) -> Dict[str, str]:
 
 
 def preview_posts(posts: List[Dict], num_posts: int = 3):
+    """
+    Returns a subset of the list of posts, with the post body truncated
+    :param posts: List of post dicts
+    :param num_posts: Number of posts to truncate and return.
+    :return: num_posts number of posts, with the body truncated and marked Markup-safe.
+    """
     last_x_posts = posts[:num_posts]
     rendered_posts = (body_markup(x, False) for x in last_x_posts)
     truncated_posts = map(truncate_post, rendered_posts)
@@ -180,7 +184,7 @@ async def categories(category):
 async def tags(tag):
     """
     Retrieves the posts tagged with the specified tag.
-    :param category: tag of the post
+    :param tag: tag of the post
     :return: main.html template, rendered with the up-to-five most recent posts from the tag
     """
     posts = await db_conn.get_posts_by_attr_containing("tags", tag)
