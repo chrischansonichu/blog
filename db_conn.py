@@ -7,7 +7,7 @@ from typing import Dict, List
 from async_lru import alru_cache
 from asyncache import cached
 import boto3
-from boto3.dynamodb.conditions import Key, Attr, Contains
+from boto3.dynamodb.conditions import Key, Attr
 from cachetools import TTLCache
 
 dynamodb = boto3.resource("dynamodb")
@@ -43,10 +43,28 @@ async def query_table(key, value):
     return response
 
 
-async def add_new_post(post_id: str, title: str, body: str, categories: List[str], tags: List[str],
-                       post_thumbnail: str,
-                       author_name: str = "BD Himes",
-                       author_email: str = "self@bdhimes.com"):
+async def add_new_post(
+        post_id: str,
+        title: str,
+        body: str,
+        categories: List[str],
+        tags: List[str],
+        post_thumbnail: str,
+        author_name: str,
+        author_email: str
+):
+    """
+    Adds a new post to the blog database table.
+    :param post_id: unique id for the post
+    :param title: title of the post
+    :param body: body (in MD or HTML) for the post
+    :param categories: list of categories for the post
+    :param tags: list of tags for the post
+    :param post_thumbnail: thumbnail for the post
+    :param author_name: post author's name
+    :param author_email: post author's email address
+    :return:
+    """
     now = int(time.time())
     insert = blog_table.put_item(
         Item={
