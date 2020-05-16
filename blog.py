@@ -15,7 +15,7 @@ from quart import Quart, render_template, make_response, request
 import db_conn
 from utils.django_utils import truncate_html_words
 
-ROOT_DIR = path.abspath(path.dirname(__file__))
+ROOT_DIR = path.abspath(path.dirname(path.abspath(path.dirname(__file__))))
 
 app = Quart(__name__,
             static_folder=path.join(ROOT_DIR, "static"),
