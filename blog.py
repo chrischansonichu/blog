@@ -1,7 +1,7 @@
 from collections import Counter
 from functools import reduce
 import json
-from os import path
+from os import path, getenv
 import time
 from typing import Dict, List, Union
 
@@ -73,6 +73,11 @@ def category_counter(d: List[Dict]) -> List[Dict[str, Union[str, int]]]:
 
 async def get_all_posts_by_date():
     return sorted(await db_conn.get_all_posts(), key=lambda x: x["date"], reverse=True)
+
+
+@app.template_filter("env")
+def env(key: str) -> str:
+    return getenv(key)
 
 
 @app.template_filter('ctime')
