@@ -1,5 +1,6 @@
 import asyncio
 from decimal import Decimal
+import os
 import time
 from typing import Dict, List
 
@@ -10,7 +11,8 @@ from boto3.dynamodb.conditions import Key, Attr, Contains
 from cachetools import TTLCache
 
 dynamodb = boto3.resource("dynamodb")
-blog_table = dynamodb.Table("blog")
+blog_table_name = os.getenv("BLOGTABLE")
+blog_table = dynamodb.Table(blog_table_name)
 
 
 @alru_cache(maxsize=56)
