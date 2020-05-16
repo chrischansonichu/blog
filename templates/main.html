@@ -1,0 +1,62 @@
+{% include 'header.html' %}
+  <!-- Content
+   ================================================== -->
+   <div id="content-wrap">
+
+    <div class="row">
+
+        <div id="main" class="eight columns">
+            {% if subtitle %}
+                <h1>{{ subtitle }}</h1><br>
+            {% endif %}
+
+            {% for post in posts %}
+            <article class="entry">
+
+                    <header class="entry-header">
+
+                        <h2 class="entry-title">
+                            <a href="/post/{{ post.postId }}" title="">{{ post.title }}</a>
+                        </h2>
+
+                        <div class="entry-meta">
+                            <ul>
+                                <li>{{ post.date | ctime }}</li>
+                                <span class="meta-sep">&bull;</span>
+                                {% for category in post.categories %}
+                                        <a href="/categories/{{ category }}" title="" rel="category tag">{{ category}}</a>{%if not loop.last %},{% endif %}
+                                {% endfor %}
+                                <span class="meta-sep">&bull;</span>
+                                <li><a href="mailto:{{ post.author.email }}">{{ post.author.name }}</a></li>
+                            </ul>
+                        </div>
+
+                    </header>
+
+                    <div class="entry-content">
+                        {{ post.body }}
+                    </div>
+
+                </article> <!-- end entry -->
+                {% endfor %}
+
+                <div class="pagenav">
+                    <p>
+                    <a rel="prev" href="#">Prev</a>
+                    <a rel="next" href="#">Next</a>
+                    </p>
+                </div>
+
+
+        </div> <!-- end main -->
+
+        {% if include_sidebar %}
+            {% include 'sidebar.html' %}
+        {% endif %}
+
+    </div> <!-- end row -->
+
+   </div> <!-- end content-wrap -->
+
+
+{% include 'footer.html' %}

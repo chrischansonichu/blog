@@ -1,0 +1,9 @@
+asyncache
+async_lru
+boto3
+cachetools
+hypercorn
+markdown2
+pygments
+quart
+quill-delta[html]

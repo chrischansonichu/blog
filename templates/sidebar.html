@@ -1,0 +1,51 @@
+        <div id="sidebar" class="four columns">
+
+            <div class="widget widget_search">
+                  <h3>Search</h3>
+                  <form action="#">
+
+                     <input type="text" value="Search here..." onblur="if(this.value == '') { this.value = 'Search here...'; }" onfocus="if (this.value == 'Search here...') { this.value = ''; }" class="text-search">
+                     <input type="submit" value="" class="submit-search">
+
+                  </form>
+               </div>
+
+            <div class="widget widget_categories group">
+                <h3>Categories.</h3>
+                <ul>
+                    {% for category in categories %}
+                        <li><a href="/categories/{{ category.name }}" title="">{{ category.name }}</a> ({{ category.count }})</li>
+                    {% endfor %}
+                </ul>
+                </div>
+
+                <div class="widget widget_text group">
+                    <h3>Featured Tech</h3>
+
+                <p>This site is built with <a href="https://gitlab.com/pgjones/quart">Quart</a>, an asyncio fully-API-compatible Flask alternative. Consider checking it out.</p>
+
+            </div>
+
+            <div class="widget widget_tags">
+               <h3>Post Tags.</h3>
+
+               <div class="tagcloud group">
+                {% for tag in tags %}
+                    <a href="/tags/{{ tag }}">{{ tag }}</a>
+                {% endfor %}
+               </div>
+
+            </div>
+
+            <div class="widget widget_popular">
+               <h3>Popular Posts.</h3>
+
+               <ul class="link-list">
+                {% for post in featured_posts %}
+                  <li><a href="/post/{{ post.postId }}">{{ post.title }}</a></li>
+                {% endfor %}
+               </ul>
+
+            </div>
+
+        </div> <!-- end sidebar -->

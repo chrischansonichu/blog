@@ -1,0 +1,55 @@
+{% include 'header.html' %}
+<!-- Content
+   ================================================== -->
+   <div id="content-wrap">
+
+    <div class="row">
+
+        <div id="main" class="eight columns">
+
+            <article class="entry">
+
+                    <header class="entry-header">
+
+                        <h2 class="entry-title">
+                            {{ title }}
+                        </h2>
+
+                        <div class="entry-meta">
+                            <ul>
+                                <li>{{ date | ctime }}</li>
+                                <span class="meta-sep">&bull;</span>
+                                <li>
+                                    {% for category in categories %}
+                                        <a href="/categories/{{ category }}" title="" rel="category tag">{{ category}}</a>{%if not loop.last %},{% endif %}
+                                    {% endfor %}
+                                </li>
+                                <span class="meta-sep">&bull;</span>
+                                <li><a href="mailto:{{ author.email }}">{{ author.name }}</a></li>
+                            </ul>
+                        </div>
+
+                    </header>
+
+                    <div class="entry-content-media">
+                        {% if post_thumbnail %}
+                            <div class="post-thumb">
+                                <img src="{{ post_thumbnail }}">
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="entry-content">
+                        {{ body }}
+                    </div>
+
+                    <p class="tags">
+                     <span>Tagged in </span>:
+                      {% for tag in tags %}
+                        <a href="/tags/{{ tag }}">{{ tag }}</a>{% if not loop.last %}, {% endif %}
+                      {% endfor %}
+                    </p>
+
+                </article>
+
+{% include 'footer.html' %}
