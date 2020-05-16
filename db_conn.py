@@ -2,7 +2,7 @@ import asyncio
 from decimal import Decimal
 import os
 import time
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from async_lru import alru_cache
 from asyncache import cached
@@ -28,17 +28,28 @@ async def get_post_by_id(post_id: str) -> Dict[str, str]:
 
 
 @cached(cache=TTLCache(maxsize=128, ttl=600))
-async def get_posts_by_attr_is_in(attr, value):
+async def get_posts_by_attr_containing(attr, value):
+    """
+    Gets all posts from the db table where the value is contained in the attr.
+    E.g. attr = "categories", value = "tech".
+    Retuns of this function are cached for 10m.
+    :param attr: The column name for which to check (should be a container of some sort, like a list)
+    :param value: The item contained in attr. If attr is a list of strings, this would be a string.
+    :return:
+    """
     return blog_table.scan(FilterExpression=Attr(attr).contains(value))
 
 
-@cached(cache=TTLCache(maxsize=128, ttl=600))
-async def get_all_posts():
-    return blog_table.scan().get("Items", [])
-
-
 @cached(cache=TTLCache(maxsize=128, ttl=6000))
-async def query_table(key, value):
+async def query_table(key, value) -> Dict[str, Union[str, int, list, dict]]:
+    """
+    Queries the blog table for a key-value equality pair, returning the full result JSON.
+    E.g. key="postId", value="demo" to get the post with the postId of "demo"
+    :param key: Key to query against.
+    :param value: Value the key should equal.
+    :return: JSON response. If successful, the post will be a single-item list within the "Items" key of the response;
+             if unsuccessful (e.g. the value does not exist for the key), the Items list will be empty.
+    """
     response = blog_table.query(KeyConditionExpression=Key(key).eq(value))
     return response
 
@@ -52,7 +63,7 @@ async def add_new_post(
         post_thumbnail: str,
         author_name: str,
         author_email: str
-):
+) -> Dict[str, Dict[str, Union[str, int, dict, list]]]:
     """
     Adds a new post to the blog database table.
     :param post_id: unique id for the post
@@ -63,7 +74,8 @@ async def add_new_post(
     :param post_thumbnail: thumbnail for the post
     :param author_name: post author's name
     :param author_email: post author's email address
-    :return:
+    :return: JSON response if successful containing the request's metadata.
+             If unsuccessful, an exception is raised.
     """
     now = int(time.time())
     insert = blog_table.put_item(

@@ -147,7 +147,7 @@ async def submit_post():
 
 @app.route("/categories/<string:category>")
 async def categories(category):
-    posts = await db_conn.get_posts_by_attr_is_in("categories", category)
+    posts = await db_conn.get_posts_by_attr_containing("categories", category)
     truncated_posts = preview_posts(posts["Items"], 5)
     return await render_template("main.html",
                                  subtitle=f"Posts in category: {category}",
@@ -156,7 +156,7 @@ async def categories(category):
 
 @app.route("/tags/<string:tag>")
 async def tags(tag):
-    posts = await db_conn.get_posts_by_attr_is_in("tags", tag)
+    posts = await db_conn.get_posts_by_attr_containing("tags", tag)
     truncated_posts = preview_posts(posts["Items"], 5)
     return await render_template("main.html",
                                  subtitle=f"Posts tagged as: {tag}",
