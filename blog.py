@@ -1,13 +1,10 @@
 from collections import Counter
 from functools import reduce
-import json
 from os import path, getenv
 import time
 from typing import Dict, List, Union
 
 from async_lru import alru_cache
-# from cachetools import cached, LRUCache, TTLCache
-from delta import html
 import markdown2
 import quart
 from quart import Quart, render_template, make_response, request
@@ -20,7 +17,8 @@ ROOT_DIR = path.abspath(path.dirname(path.abspath(path.dirname(__file__))))
 app = Quart(__name__,
             static_folder=path.join(ROOT_DIR, "static"),
             static_url_path="/static")
-app.secret_key = "vsGmEN8XNT0cv9MolM7Qhg"
+app.secret_key = getenv("SECRETKEY", "")
+
 
 def markup(string: str, markup_=True) -> str:
     """
@@ -60,6 +58,12 @@ def truncate_post(post: Dict[str, str], words: int = 85) -> Dict[str, str]:
 
 
 def preview_posts(posts: List[Dict], num_posts: int = 3):
+    """
+    Returns a subset of the list of posts, with the post body truncated
+    :param posts: List of post dicts
+    :param num_posts: Number of posts to truncate and return.
+    :return: num_posts number of posts, with the body truncated and marked Markup-safe.
+    """
     last_x_posts = posts[:num_posts]
     rendered_posts = (body_markup(x, False) for x in last_x_posts)
     truncated_posts = map(truncate_post, rendered_posts)
@@ -67,7 +71,7 @@ def preview_posts(posts: List[Dict], num_posts: int = 3):
 
 
 def category_counter(d: List[Dict]) -> List[Dict[str, Union[str, int]]]:
-    count = Counter(reduce(lambda x, y: x+y["categories"], d, []))
+    count: Counter = Counter(reduce(lambda x, y: x+y["categories"], d, []))
     return [{"name": x, "count": y} for x, y in count.items()]
 
 
@@ -77,7 +81,12 @@ async def get_all_posts_by_date():
 
 @app.template_filter("env")
 def env(key: str) -> str:
-    return getenv(key)
+    """
+    Template filter that allows retrieving environ vars in the Jinja2 template.
+    :param key: Environ var key
+    :return: the environ var value; empty string if not found.
+    """
+    return getenv(key, "")
 
 
 @app.template_filter('ctime')
@@ -121,33 +130,50 @@ async def get_post(post_id: str):
             await render_template("post.html", **marked_up_post)
         )
     except (AttributeError, TypeError):
-        quart.abort(404)
+        return quart.abort(404)
 
 
 @app.route("/latest")
 async def latest():
+    """
+    Redirects to the most recent blog post page.
+    :return: Most recent blog post, 404 page if no posts exist.
+    """
     all_posts = await get_all_posts_by_date()
-    latest_post = all_posts[0]
-    return quart.redirect(f"/post/{latest_post['postId']}")
+    try:
+        latest_post = all_posts[0]
+        return quart.redirect(f"/post/{latest_post['postId']}")
+    except IndexError:
+        return quart.abort(404)
 
 
 @app.route("/write_post")
 async def write_post():
+    """
+    Not yet implemented.
+    """
     return await make_response(await render_template("write_post.html"))
 
 
 @app.route("/submit_post", methods=["POST"])
 async def submit_post():
+    """
+    Returns the data passed to it in JSON format. For the not-yet-implemented write_post function to hit.
+    :return: JSON of data passed to it.
+    """
     data = await request.form
     body = data.get("post_body")
-    print(body)
-    print(html.render(json.loads(body)["ops"]))
     return quart.jsonify(data)
 
 
 @app.route("/categories/<string:category>")
 async def categories(category):
-    posts = await db_conn.get_posts_by_attr_is_in("categories", category)
+    """
+    Retrieves the posts in the specified category.
+    :param category: category of the post
+    :return: main.html template, rendered with the up-to-five most recent posts from the category
+    """
+    posts = await db_conn.get_posts_by_attr_containing("categories", category)
     truncated_posts = preview_posts(posts["Items"], 5)
     return await render_template("main.html",
                                  subtitle=f"Posts in category: {category}",
@@ -156,7 +182,12 @@ async def categories(category):
 
 @app.route("/tags/<string:tag>")
 async def tags(tag):
-    posts = await db_conn.get_posts_by_attr_is_in("tags", tag)
+    """
+    Retrieves the posts tagged with the specified tag.
+    :param tag: tag of the post
+    :return: main.html template, rendered with the up-to-five most recent posts from the tag
+    """
+    posts = await db_conn.get_posts_by_attr_containing("tags", tag)
     truncated_posts = preview_posts(posts["Items"], 5)
     return await render_template("main.html",
                                  subtitle=f"Posts tagged as: {tag}",
@@ -171,6 +202,9 @@ async def favicon():
 
 @app.errorhandler(404)
 async def page_not_found(e):
+    """
+    404 page
+    """
     return await make_response(
         await render_template("error.html",
                               title=e,
