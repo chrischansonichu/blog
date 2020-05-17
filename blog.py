@@ -30,7 +30,7 @@ def markup(string: str, markup_=True) -> str:
     if string.startswith("<"):
         output = string
     else:
-        output = markdown2.markdown(string, extras=["tables", "fenced-code-blocks"])
+        output = markdown2.markdown(string, extras=["tables", "fenced-code-blocks", "strike"])
     if markup_:
         return quart.Markup(output)
     else:
