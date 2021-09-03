@@ -115,6 +115,11 @@ async def index():
                                                      include_sidebar=True))
 
 
+@app.route("/gas-calc")
+async def gas_calc():
+    return await render_template("gas-calc.html")
+
+
 # @cached(cache=TTLCache(maxsize=128, ttl=6000))
 @app.route("/post/<string:post_id>")
 async def get_post(post_id: str):

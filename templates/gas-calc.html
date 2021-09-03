@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <title>Gas Cost Calc</title>
+    </head>
+    <style>
+        .tg  {border-collapse:collapse;border-spacing:0;}
+        .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+          overflow:hidden;padding:10px 5px;word-break:normal;}
+        .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+          font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+        .tg .tg-0lax{text-align:left;vertical-align:top}
+        .enMoney::before {
+            content:"$";
+        }
+        input[type='number'] {
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            padding: 0 0 0 0 !important;
+            color: black;
+        }
+    </style>
+    <body>
+        <h1>Calculate Your Monthly Fuel Costs For Any Two Given Monthly Gas Prices</h1>
+        <h3>Default values are for American average miles driven & mpg, default fuel costs given are July 2019 and July 2021</h3>
+        <table class="tg">
+        <tbody>
+          <tr>
+            <td class="tg-0lax"><label for="yearlyMilesDriven">Yearly Miles Driven</label></td>
+            <td class="tg-0lax"><input id="yearlyMilesDriven" type="number" value="13500"></td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><label for="monthlyMilesDriven">Monthly Miles Driven</label></td>
+            <td class="tg-0lax"><input id="monthlyMilesDriven" type="number" value="1125"></td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><label for="oldPPG">Old Price Per Gallon</label></td>
+            <td class="tg-0lax enMoney"><input type="number" step="0.01" id="oldPPG" value="2.82"></td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><label for="newPPG">New Price Per Gallon</label></td>
+            <td class="tg-0lax enMoney"><input type="number" step="0.01" id="newPPG" value="3.23"></td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><label for="avgMPG">Average Miles Per Gallon of Vehicle</label></td>
+            <td class="tg-0lax"><input type="number" step="0.1" id="avgMPG" value="24.9"></td>
+          </tr>
+          <tr>
+            <td class="tg-0lax">Old Monthly Gas Cost</td>
+            <td class="tg-0lax enMoney"><input type="number" step="0.1" id="oldMonthlyGasCost" disabled></td>
+          </tr>
+          <tr>
+            <td class="tg-0lax">New Monthly Gas Cost</td>
+            <td class="tg-0lax enMoney"><input type="number" step="0.1" id="newMonthlyGasCost" disabled></td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><label for="delta" id="deltaLabel">Delta</label></td>
+            <td class="tg-0lax enMoney"><input type="number" step="0.1" id="delta" disabled></td>
+          </tr>
+        </tbody>
+        </table>
+    </body>
+    <script>
+        let ymd = $("#yearlyMilesDriven");
+        let mmd = $("#monthlyMilesDriven");
+        let oldPPG = $("#oldPPG");
+        let newPPG = $("#newPPG");
+        let avgMPG = $("#avgMPG");
+        let omgc = $("#oldMonthlyGasCost");
+        let nmgc = $("#newMonthlyGasCost");
+        let delta = $("#delta");
+
+        ymd.change(function () {
+            mmd.val(this.value / 12);
+        })
+
+        mmd.change(function () {
+            ymd.val(this.value * 12);
+        })
+
+        function f(v) {
+            return parseFloat(v.val())
+        }
+
+        function updateDeltaLabel(value) {
+            let pos = "more";
+            if (value < 0) {
+                pos = "less";
+            }
+            $("#deltaLabel").html(`Your monthly gas bill is ${pos} expensive by`)
+        }
+
+        function updateValues() {
+            omgc.val((f(mmd) / f(avgMPG) * f(oldPPG)).toFixed(2));
+            nmgc.val((f(mmd) / f(avgMPG) * f(newPPG)).toFixed(2));
+            const deltaVal = (f(nmgc) - f(omgc))
+            delta.val(Math.abs(deltaVal).toFixed(2));
+            updateDeltaLabel(deltaVal);
+        }
+
+        $(".tg").change(function () {
+            updateValues();
+        })
+
+        updateValues();
+    </script>
+</html>
